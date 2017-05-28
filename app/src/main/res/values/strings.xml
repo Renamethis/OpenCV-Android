@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">OpencvDetect</string>
+    <string-array name="items">
+        <item>1920x1080</item>
+        <item>1280x960</item>
+    <item>960x720</item>
+    <item>720x480</item>
+    <item>640x480</item>
+        <item>480x320</item>
+    </string-array>
+    <string-array name="items1">
+    <item>Frontal_Face_lbp</item>
+    <item>Full_Body_haar</item>
+    <item>Eye_Haar</item>
+    <item>Frontal_cat_face_haar</item>
+    <item>Frontal_Face_haar</item><item>Load_User_Cascade</item>
+    </string-array>
+</resources>
