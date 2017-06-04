@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     TextView t4,t5;
     boolean CheckFileDialog = false;
     String suda = "";
-    String filename = "zazse_path_to_haar_cascades.txt";
+    String filename = "_path_to_haar_and_lbp_cascades.txt";
     static {
         System.loadLibrary("MyLibs");
     }
@@ -249,14 +249,12 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         dialog.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 suda = t.getText().toString();
-                if ((OpencvNative.loadCascades(1, suda)) == -1) CheckFileDialog = true;
+                if ((OpencvNative.loadCascades(0, suda)) == -1) {CheckFileDialog = true;Toast.makeText(getApplicationContext(), "Path is incorrect", Toast.LENGTH_LONG).show(); filedialog();}
                 else {
+                    CheckFileDialog = false;
                     try {
-                        // отрываем поток для записи
                         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(openFileOutput(filename, MODE_PRIVATE)));
-                        // пишем данные
                         bw.write(suda);
-                        // закрываем поток
                         bw.close();
                         Log.d("ZDAROVA", "Файл записан");
                     } catch (FileNotFoundException e) {

@@ -36,6 +36,7 @@ JNIEXPORT jint JNICALL Java_com_example_ivan_opencvdetect_OpencvNative_loadCasca
     //removech(name);
     __android_log_print(ANDROID_LOG_VERBOSE, APPNAME, " TEST :%s", name);
     if( !cascade.load(name)){ printf("--(!)Error loading\n");return -1;};
+    return 0;
 }
 JNIEXPORT void JNICALL Java_com_example_ivan_opencvdetect_OpencvNative_MakeHist
 (JNIEnv *, jclass, jlong addr, jint x1, jint y1,jint x2,jint y2) {
