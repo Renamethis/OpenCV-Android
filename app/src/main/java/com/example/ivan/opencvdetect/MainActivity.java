@@ -15,6 +15,7 @@ import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import org.opencv.android.BaseLoaderCallback;
@@ -25,6 +26,14 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 /*
     BY IVAN GAVRILOV
  */
@@ -33,6 +42,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     JavaCameraView JCam;
     Mat mRgba,ya;
     TextView t4,t5;
+    boolean CheckFileDialog = false;
+    String suda = "";
+    String filename = "zazse_path_to_haar_cascades.txt";
     static {
         System.loadLibrary("MyLibs");
     }
@@ -68,6 +80,23 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         setContentView(R.layout.activity_main);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        File f = new File(getFilesDir() + "/" + filename);
+        if(!(f.exists())) {
+            filedialog();
+        } else {
+            try {
+                String str;
+                BufferedReader br = new BufferedReader(new InputStreamReader(openFileInput(filename)));
+                while ((str = br.readLine()) != null) {
+                    suda+=str;
+                }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        Log.d("ZDAROVA", "NY YA");
         JCam = (JavaCameraView)findViewById(R.id.view);
         b4 = (ToggleButton)findViewById(R.id.toggleButton2);
         b6 = (ToggleButton)findViewById(R.id.toggleButton4);
@@ -123,7 +152,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             }
         });
         JCam.setCvCameraViewListener(this);
-        OpencvNative.loadCascades(1);
+        OpencvNative.loadCascades(1, suda);
         ArrayAdapter<String> adapter1 = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, data);
         ArrayAdapter<String> adapter2 = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, eto);
         Spinner spinner1 = (Spinner)findViewById(R.id.spinner3);
@@ -151,7 +180,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         });
     }
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        if(isChecked) { Cascades = true;c.setText("CASCADES-ON");}
+        if(isChecked) { Cascades = true;c.setText("CASCADES-ON");if(CheckFileDialog) Toast.makeText(getApplicationContext(), "Cascade does not exist.", Toast.LENGTH_LONG).show();}
             else {Cascades = false;c.setText("CASCADES-OFF");}
     }
     public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
@@ -199,7 +228,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         {
             if(pos == 5) {
                 showcascDialog();
-            } else OpencvNative.loadCascades(pos);
+            } else if((OpencvNative.loadCascades(pos,suda)) == -1) {
+                CheckFileDialog = true;
+            }
         }
         JCam.enableView();
         JCam.enableFpsMeter();
@@ -208,7 +239,43 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     //DIALOGS
     int x1,x2,y1,y2;
     int xm1, ym1, xm2, ym2;
-
+    void filedialog() {
+        final AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+        dialog.setTitle("Enter the path to the directory where the haar cascades are located");
+        View dial = getLayoutInflater().inflate(R.layout.filedialog, null);
+        dialog.setView(dial);
+        final EditText t;
+        t = (EditText)dial.findViewById(R.id.editText);
+        dialog.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                suda = t.getText().toString();
+                if ((OpencvNative.loadCascades(1, suda)) == -1) CheckFileDialog = true;
+                else {
+                    try {
+                        // отрываем поток для записи
+                        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(openFileOutput(filename, MODE_PRIVATE)));
+                        // пишем данные
+                        bw.write(suda);
+                        // закрываем поток
+                        bw.close();
+                        Log.d("ZDAROVA", "Файл записан");
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        dialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                CheckFileDialog = true;
+            }
+        });
+        dialog.create();
+        dialog.show();
+    }
     void camshiftdialog() {
         x1 = x.intValue();
         x2 = x.intValue();
@@ -262,15 +329,14 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
     public void showcascDialog() {
         final AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-        dialog.setTitle("Введите название каскада:");
+        dialog.setTitle("Write path to cascade");
         View linearlayout = getLayoutInflater().inflate(R.layout.dialog1, null);
         dialog.setView(linearlayout);
         EditText t = (EditText)linearlayout.findViewById(R.id.editText);
         final String a = t1.getText().toString();
-        final String b = "/storage/sdcard/data" + a;
         dialog.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
-                OpencvNative.loadUserCascade(b);
+                OpencvNative.loadUserCascade(a);
             }
         });
         dialog.create();
@@ -374,7 +440,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         mRgba = inputFrame.rgba();
         //System.out.println(x1 + " " + y1 + " " + " " + x2 + " " + y2);
-        if(Cascades)
+        if(Cascades && !CheckFileDialog)
             OpencvNative.detect(mRgba.getNativeObjAddr());
         if(Eff)
             Imgproc.cvtColor(mRgba,mRgba,Imgproc.COLOR_BGR2GRAY);

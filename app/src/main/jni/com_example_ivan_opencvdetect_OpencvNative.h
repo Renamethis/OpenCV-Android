@@ -20,7 +20,7 @@ void detect(Mat& frame, string cascades);
 void convert(Mat& frame, int a);
 void Corner(Mat& frame);
 void Camshift(Mat frame);
-string name;
+char * name;
 Rect ROI;
 Mat ya;
 CascadeClassifier cascade;
@@ -31,8 +31,8 @@ JNIEXPORT void JNICALL Java_com_example_ivan_opencvdetect_OpencvNative_detect
   (JNIEnv *, jclass, jlong);
 JNIEXPORT void JNICALL Java_com_example_ivan_opencvdetect_OpencvNative_fColor
 (JNIEnv *, jclass, jlong ,jint, jint,jint,jint,jint, jint);
-JNIEXPORT void JNICALL Java_com_example_ivan_opencvdetect_OpencvNative_loadCascades
-(JNIEnv *, jclass, jint);
+JNIEXPORT jint JNICALL Java_com_example_ivan_opencvdetect_OpencvNative_loadCascades
+(JNIEnv *, jclass, jint,jstring);
 
 JNIEXPORT void JNICALL Java_com_example_ivan_opencvdetect_OpencvNative_cHSV
 (JNIEnv *, jclass, jlong);

@@ -7,8 +7,8 @@ package com.example.ivan.opencvdetect;
 public class OpencvNative {
     public native static void detect(long addrRgba);
     public native static void hdetect(long addrRgba);
-    public native static void loadCascades(int type);
-    public native static void loadUserCascade(String type);
+    public native static int loadCascades(int type, String path);
+    public native static void loadUserCascade(String path);
     public native static void cHSV(long addrRgba);
     public native static void fColor(long addrRgba, int h1,int s1,int v1, int h2,int s2, int v2);
     public native static void Harris(long addrRgba);

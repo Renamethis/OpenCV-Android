@@ -1,26 +1,41 @@
 #include <com_example_ivan_opencvdetect_OpencvNative.h>
+#include <iostream>
+#include <cstring>
+#include <android/log.h>
+#define APPNAME "MyApp"
 JNIEXPORT void JNICALL Java_com_example_ivan_opencvdetect_OpencvNative_detect
   (JNIEnv *, jclass, jlong addrRgba){
        Mat& mRgb = *(Mat*)addrRgba;
         detect(mRgb,name);
 
 }
+void removech(char *c) {
+    int i;
+    for(i = 0; i < strlen(c); i++) {
+        c[i] = c[i+1];
+    }
+    c[i-1] = '\0';
+}
 int hsize = 16;
 float hranges[] = {0,180};
 const float* phranges = hranges;
-JNIEXPORT void JNICALL Java_com_example_ivan_opencvdetect_OpencvNative_loadCascades
-(JNIEnv *, jclass, jint type) {
-    int x = (int) type;
+JNIEXPORT jint JNICALL Java_com_example_ivan_opencvdetect_OpencvNative_loadCascades
+(JNIEnv *env, jclass, jint TYPE, jstring path) {
+    int x = (int) TYPE;
+    name = (char*)(*env).GetStringUTFChars(path,0);
+    name = (char*)realloc(name, 40);
     switch(x) {
-        case 0: name = "/storage/sdcard/data/lbpcascade_frontalface.xml";break;
-        case 1: name = "/storage/sdcard/data/haarcascade_fullbody.xml";break;
-        case 2: name = "/storage/sdcard/data/haarcascade_eye.xml";break;
-        case 3: name = "/storage/sdcard/data/haarcascade_frontalcatface_extended.xml";break;
-        case 4: name = "/storage/sdcard/data/haarcascade_frontalface_alt.xml"; break;
+        case 0: strcat(name, "/lbpcascade_frontalface.xml");break;
+        case 1: name =  strcat(name,"/haarcascade_fullbody.xml");break;
+        case 2: name =  strcat(name,"/haarcascade_eye.xml");break;
+        case 3: name =  strcat(name,"/haarcascade_frontalcatface_extended.xml");break;
+        case 4: name =  strcat(name,"/haarcascade_frontalface_alt.xml"); break;
         default: printf("BUGGED");
 
     }
-    if( !cascade.load(name)){ printf("--(!)Error loading\n");};
+    //removech(name);
+    __android_log_print(ANDROID_LOG_VERBOSE, APPNAME, " TEST :%s", name);
+    if( !cascade.load(name)){ printf("--(!)Error loading\n");return -1;};
 }
 JNIEXPORT void JNICALL Java_com_example_ivan_opencvdetect_OpencvNative_MakeHist
 (JNIEnv *, jclass, jlong addr, jint x1, jint y1,jint x2,jint y2) {
@@ -35,7 +50,7 @@ JNIEXPORT void JNICALL Java_com_example_ivan_opencvdetect_OpencvNative_MakeHist
     ROI.y = (int)y1;
     Mat image;
     Mat& frame = *(Mat*)addr;
-rectangle(frame, Point(100,250), Point(100 + 99, 250-100), Scalar(255,0,0), 2,8,0);
+    rectangle(frame, Point(100,250), Point(100 + 99, 250-100), Scalar(255,0,0), 2,8,0);
     cvtColor(frame, image, COLOR_BGR2HSV);
     Mat mask;
     int ch[] = {0, 0};
