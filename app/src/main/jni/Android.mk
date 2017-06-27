@@ -10,7 +10,7 @@
 	OPENCV_LIB_TYPE:=SHARED
 	include ${OPENCVROOT}/sdk/native/jni/OpenCV.mk
 
-	LOCAL_SRC_FILES := com_example_ivan_opencvdetect_OpencvNative.cpp
+	LOCAL_SRC_FILES := com_pobeda_ivan_opencvdetect_OpencvNative.cpp
 
 	LOCAL_LDLIBS += -llog
 	LOCAL_MODULE := MyLibs
